@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Stack Squad — IT-спільнота розробників</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Montserrat', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            squad: {
+              bg: '#EAEAEA',
+              bgLight: '#EFEFEF',
+              ink: '#111111',
+              muted: '#555555',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Загальні стилі монохромної естетики Stack Squad */
+    body {
+      background-color: #EAEAEA;
+      color: #111111;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Моноширинні цифри для таймера та статистики */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Контрастний чорно-білий фільтр для всіх фотографій */
+    .bw-photo {
+      filter: grayscale(100%) contrast(115%);
+      transition: filter 0.4s ease, transform 0.5s ease;
+    }
+    .bw-card:hover .bw-photo {
+      filter: grayscale(100%) contrast(128%);
+      transform: scale(1.03);
+    }
+
+    /* Фірмові Pill-кнопки з макета */
+    .btn-pill-solid {
+      background-color: #111111;
+      color: #FFFFFF;
+      border: 1.5px solid #111111;
+      border-radius: 9999px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-pill-solid:hover {
+      background-color: #2B2B2B;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -8px rgba(17, 17, 17, 0.45);
+    }
+    .btn-pill-solid:active {
+      transform: translateY(0);
+    }
+
+    .btn-pill-outline {
+      background-color: transparent;
+      color: #111111;
+      border: 1.5px solid #111111;
+      border-radius: 9999px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-pill-outline:hover {
+      background-color: #111111;
+      color: #FFFFFF;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -8px rgba(17, 17, 17, 0.25);
+    }
+    .btn-pill-outline:active {
+      transform: translateY(0);
+    }
+
+    /* Картки з тонкими чорними рамками */
+    .squad-card {
+      background-color: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(8px);
+      border: 1px solid #111111;
+      border-radius: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .squad-card:hover {
+      background-color: #FFFFFF;
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px -12px rgba(17, 17, 17, 0.14);
+    }
+
+    /* Анімація перемикання вкладок SPA */
+    .page-section {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .page-section.active {
+      display: block;
+      animation: fadeSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Підкреслення активного пункту меню */
+    .nav-link {
+      position: relative;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      transition: all 0.2s ease;
+    }
+    .nav-link.active {
+      background-color: #111111;
+      color: #FFFFFF;
+    }
+    .nav-link:not(.active):hover {
+      background-color: rgba(17, 17, 17, 0.08);
+    }
+
+    /* Панорамна колаж-смуга команди на головній сторінці (відтворення стилістики фото) */
+    .hero-team-strip {
+      mask-image: linear-gradient(to top, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%);
+      -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-[#111111] selection:text-white">
+
+<!-- ==================== ФІКСОВАНИЙ ХЕДЕР ==================== -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-[#EAEAEA]/90 backdrop-blur-md border-b border-[#111111]/15">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 sm:h-20">
+      <!-- Логотип -->
+      <button onclick="navigateTo('home')" class="flex items-center gap-2.5 text-left group focus:outline-none">
+        <img src="./logo.png" alt="Stack Squad Logo" class="w-9 h-9 rounded-full object-cover group-hover:scale-105 transition-transform"/>
+        <span class="font-display font-extrabold text-lg sm:text-xl tracking-tight text-[#111111]">
+            Stack Squad
+          </span>
+      </button>
+
+      <!-- Десктопна навігація -->
+      <nav class="hidden lg:flex items-center gap-1 text-sm font-medium" aria-label="Головна навігація">
+        <button data-nav="home" onclick="navigateTo('home')" class="nav-link active">Головна</button>
+        <button data-nav="about" onclick="navigateTo('about')" class="nav-link">Про нас</button>
+        <button data-nav="projects" onclick="navigateTo('projects')" class="nav-link">Проекти</button>
+        <button data-nav="events" onclick="navigateTo('events')" class="nav-link">Події</button>
+<!--        <button data-nav="history" onclick="navigateTo('history')" class="nav-link">Історія</button>-->
+        <button data-nav="gallery" onclick="navigateTo('gallery')" class="nav-link">Галерея</button>
+        <button data-nav="patreon" onclick="navigateTo('patreon')" class="nav-link">Patreon</button>
+        <button data-nav="contacts" onclick="navigateTo('contacts')" class="nav-link">Контакти</button>
+      </nav>
+
+      <!-- Кнопка швидкої дії + Мобільне меню -->
+      <div class="flex items-center gap-2.5">
+        <button onclick="openRegisterModal('Stack Squad Meetup #25')" class="hidden sm:inline-flex btn-pill-solid px-5 py-2 text-xs sm:text-sm font-semibold">
+          Записатися
+        </button>
+        <button id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Відкрити меню" class="lg:hidden p-2.5 rounded-full border border-[#111111] text-[#111111] hover:bg-[#111111] hover:text-white transition-colors">
+          <svg id="menuIconOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="menuIconClose" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Мобільне випадаюче меню -->
+  <div id="mobileMenu" class="hidden lg:hidden bg-[#EFEFEF] border-b border-[#111111] px-4 pt-3 pb-6 space-y-2 shadow-xl">
+    <div class="grid grid-cols-2 gap-2 text-sm font-medium">
+      <button data-nav="home" onclick="navigateTo('home')" class="nav-link active text-center py-2.5">Головна</button>
+      <button data-nav="about" onclick="navigateTo('about')" class="nav-link text-center py-2.5">Про нас</button>
+      <button data-nav="projects" onclick="navigateTo('projects')" class="nav-link text-center py-2.5">Проекти</button>
+      <button data-nav="events" onclick="navigateTo('events')" class="nav-link text-center py-2.5">Події</button>
+<!--      <button data-nav="history" onclick="navigateTo('history')" class="nav-link text-center py-2.5">Історія</button>-->
+      <button data-nav="gallery" onclick="navigateTo('gallery')" class="nav-link text-center py-2.5">Галерея</button>
+      <button data-nav="patreon" onclick="navigateTo('patreon')" class="nav-link text-center py-2.5">Patreon</button>
+      <button data-nav="contacts" onclick="navigateTo('contacts')" class="nav-link text-center py-2.5">Контакти</button>
+    </div>
+    <div class="pt-2">
+      <button onclick="openRegisterModal('Stack Squad Meetup #25')" class="w-full btn-pill-solid py-3 text-sm font-semibold">
+        Записатися на зустріч
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== ОСНОВНИЙ КОНТЕЙНЕР СТОРІНОК ==================== -->
+<main class="flex-grow pt-16 sm:pt-20">
+
+  <!-- =================================================================== -->
+  <!-- 1. ГОЛОВНА (HOME) — Відтворення макета з живим таймером і командою -->
+  <!-- =================================================================== -->
+  <section id="page-home" class="page-section active">
+    <div class="min-h-[calc(100vh-5rem)] flex flex-col justify-between pt-10 sm:pt-16">
+      <!-- Верхній та центральний блок із заголовком, таймером і кнопками -->
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+        <h1 class="font-display font-extrabold text-3xl sm:text-5xl md:text-[54px] leading-tight tracking-tight text-[#111111]">
+          Наступна зустріч Stack Squad через:
+        </h1>
+
+        <p class="mt-4 max-w-xl mx-auto text-sm sm:text-base text-[#444444] leading-relaxed font-normal">
+          Ми проводимо онлайн-зустрічі та вебінари для студентів, вайбкордерів, дизайнерів та фрілансерів. Долучайтеся до обговорення актуальних питань із розробки сайтів, додатків, ігор та впровадженні ШІ у  роботі  розробників софту.
+        </p>
+
+        <!-- Інтерактивний живий таймер зворотного відліку -->
+        <div class="mt-10 sm:mt-12 flex items-start justify-center gap-2 sm:gap-5 md:gap-7 select-none" aria-label="Таймер зворотного відліку">
+          <!-- ДНІВ -->
+          <div class="flex flex-col items-center">
+            <span id="timer-days" class="font-display font-extrabold text-4xl sm:text-6xl md:text-[64px] leading-none tabular-nums text-[#111111]">38</span>
+            <span class="mt-2.5 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase text-[#555555]">ДНІВ</span>
+          </div>
+
+          <span class="font-display font-extrabold text-3xl sm:text-5xl md:text-[56px] leading-none text-[#111111] pt-0.5">:</span>
+
+          <!-- ГОДИН -->
+          <div class="flex flex-col items-center">
+            <span id="timer-hours" class="font-display font-extrabold text-4xl sm:text-6xl md:text-[64px] leading-none tabular-nums text-[#111111]">12</span>
+            <span class="mt-2.5 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase text-[#555555]">ГОДИН</span>
+          </div>
+
+          <span class="font-display font-extrabold text-3xl sm:text-5xl md:text-[56px] leading-none text-[#111111] pt-0.5">:</span>
+
+          <!-- ХВИЛИН -->
+          <div class="flex flex-col items-center">
+            <span id="timer-minutes" class="font-display font-extrabold text-4xl sm:text-6xl md:text-[64px] leading-none tabular-nums text-[#111111]">31</span>
+            <span class="mt-2.5 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase text-[#555555]">ХВИЛИН</span>
+          </div>
+
+          <span class="font-display font-extrabold text-3xl sm:text-5xl md:text-[56px] leading-none text-[#111111] pt-0.5">:</span>
+
+          <!-- СЕКУНД -->
+          <div class="flex flex-col items-center">
+            <span id="timer-seconds" class="font-display font-extrabold text-4xl sm:text-6xl md:text-[64px] leading-none tabular-nums text-[#111111]">24</span>
+            <span class="mt-2.5 text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase text-[#555555]">СЕКУНД</span>
+          </div>
+        </div>
+
+        <!-- Дві фірмові Pill-кнопки з макета -->
+        <div class="mt-10 sm:mt-11 flex flex-wrap items-center justify-center gap-4">
+          <button onclick="openRegisterModal('Stack Squad Meetup #25')" class="btn-pill-solid px-9 py-3.5 text-sm sm:text-base font-semibold min-w-[168px]">
+            Записатися
+          </button>
+          <button onclick="navigateTo('events')" class="btn-pill-outline px-9 py-3.5 text-sm sm:text-base font-semibold min-w-[168px]">
+            Новини
+          </button>
+        </div>
+      </div>
+
+      <!-- Нижня монохромна панорамна фотографія усміхненої команди людей -->
+      <div class="mt-10 sm:mt-14 w-full max-w-7xl mx-auto px-2 sm:px-6 overflow-hidden">
+        <div class="relative rounded-t-3xl overflow-hidden hero-team-strip">
+          <div class="w-full overflow-hidden">
+
+
+          <!-- Панорамна групова фотографія команди у чорно-білому стилі -->
+          <img
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1800&q=85"
+                  alt="Усміхнена команда учасників IT-спільноти Stack Squad"
+                  onerror="this.src='https://placehold.co/1600x480/EAEAEA/111111?text=Stack+Squad+Community'"
+                  class="w-full h-64 sm:h-80 md:h-[420px] object-cover object-top grayscale"
+          />
+          </div>
+          <!-- Легкий градієнтний перехід зверху для органічного вписування в #EAEAEA -->
+          <div class="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#EAEAEA] to-transparent pointer-events-none"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 2. ПРО НАС (ABOUT)                                                  -->
+  <!-- =================================================================== -->
+  <section id="page-about" class="page-section py-12 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Заголовок сторінки -->
+      <div class="max-w-3xl">
+          <span class="inline-block px-3.5 py-1 rounded-full border border-[#111111] text-xs font-semibold uppercase tracking-wider mb-4">
+            Ком’юніті студентів та інженерів, які будують технології майбутнього разом.
+
+          </span>
+        <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight text-[#111111]">
+          Об’єднуємо інженерів, які створюють відкрите майбутнє.
+        </h2>
+        <p class="mt-5 text-base sm:text-lg text-[#444444] leading-relaxed">
+          <strong>Stack Squad</strong> — незалежна українська IT-спільнота, заснована розробниками для розробників. Ми віримо в силу живого обміну досвідом, чесного рев’ю архітектури, взаємного менторства та розвитку open-source екосистеми без зайвого офіціозу.
+        </p>
+      </div>
+
+      <!-- Ключові цифри (статистика) -->
+      <div class="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div class="squad-card p-6 sm:p-8 text-center">
+          <div class="font-display font-extrabold text-3xl sm:text-5xl tabular-nums text-[#111111]">2 400+</div>
+          <div class="mt-2 text-xs sm:text-sm font-medium uppercase tracking-wider text-[#555555]">Активних учасників</div>
+        </div>
+        <div class="squad-card p-6 sm:p-8 text-center">
+          <div class="font-display font-extrabold text-3xl sm:text-5xl tabular-nums text-[#111111]">48</div>
+          <div class="mt-2 text-xs sm:text-sm font-medium uppercase tracking-wider text-[#555555]">Проведених мітапів</div>
+        </div>
+        <div class="squad-card p-6 sm:p-8 text-center">
+          <div class="font-display font-extrabold text-3xl sm:text-5xl tabular-nums text-[#111111]">19</div>
+          <div class="mt-2 text-xs sm:text-sm font-medium uppercase tracking-wider text-[#555555]">Open-Source проєктів</div>
+        </div>
+        <div class="squad-card p-6 sm:p-8 text-center">
+          <div class="font-display font-extrabold text-3xl sm:text-5xl tabular-nums text-[#111111]">120+</div>
+          <div class="mt-2 text-xs sm:text-sm font-medium uppercase tracking-wider text-[#555555]">Годин воркшопів</div>
+        </div>
+      </div>
+
+      <!-- Цінності спільноти -->
+      <div class="mt-14 grid md:grid-cols-3 gap-6">
+        <div class="squad-card p-7">
+          <div class="w-10 h-10 rounded-full bg-[#111111] text-white flex items-center justify-center font-display font-bold text-sm mb-5">01</div>
+          <h3 class="font-display font-bold text-xl">Практика замість води</h3>
+          <p class="mt-2.5 text-sm text-[#444444] leading-relaxed">
+            Жодних рекламних презентацій. Тільки реальні кейси з продакшену, розбір падінь, бенчмарки та живий код на сцені.
+          </p>
+        </div>
+        <div class="squad-card p-7">
+          <div class="w-10 h-10 rounded-full bg-[#111111] text-white flex items-center justify-center font-display font-bold text-sm mb-5">02</div>
+          <h3 class="font-display font-bold text-xl">Відкритий код</h3>
+          <p class="mt-2.5 text-sm text-[#444444] leading-relaxed">
+            Кожен учасник може долучитися до внутрішніх інструментів спільноти, зробити перший pull request та отримати фідбек від сеньйорів.
+          </p>
+        </div>
+        <div class="squad-card p-7">
+          <div class="w-10 h-10 rounded-full bg-[#111111] text-white flex items-center justify-center font-display font-bold text-sm mb-5">03</div>
+          <h3 class="font-display font-bold text-xl">Рівність і підтримка</h3>
+          <p class="mt-2.5 text-sm text-[#444444] leading-relaxed">
+            Ми створюємо безпечне середовище, де джуніор може вільно запитати пораду в архітектора за чашкою фільтр-кави.
+          </p>
+        </div>
+      </div>
+
+      <!-- Засновники та ментори -->
+      <div class="mt-16">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+          <div>
+            <h3 class="font-display font-extrabold text-2xl sm:text-3xl">Засновники та ментори</h3>
+            <p class="mt-1 text-sm text-[#555555]">Люди, які координують розвиток Stack Squad та курують напрямки</p>
+          </div>
+          <button onclick="openRegisterModal('Стати спікером / ментором')" class="btn-pill-outline px-6 py-2.5 text-sm font-semibold self-start sm:self-auto">
+            Стати ментором
+          </button>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Ментор 1 -->
+          <div class="squad-card bw-card overflow-hidden flex flex-col">
+            <div class="aspect-[4/4] overflow-hidden border-b border-[#111111]">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=700&q=80" alt="Олексій Коваленко" onerror="this.src='https://placehold.co/500x500/EAEAEA/111111?text=O.Kovalenko'" class="w-full h-full object-cover bw-photo" />
+            </div>
+            <div class="p-5 flex-grow flex flex-col justify-between">
+              <div>
+                <h4 class="font-display font-bold text-lg">Олексій Коваленко</h4>
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#555555] mt-0.5">Co-Founder • Staff Backend</p>
+                <p class="mt-3 text-sm text-[#444444]">Архітектор високонавантажених систем, куратор Go та Rust воркшопів.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ментор 2 -->
+          <div class="squad-card bw-card overflow-hidden flex flex-col">
+            <div class="aspect-[4/4] overflow-hidden border-b border-[#111111]">
+              <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=700&q=80" alt="Марина Савченко" onerror="this.src='https://placehold.co/500x500/EAEAEA/111111?text=M.Savchenko'" class="w-full h-full object-cover bw-photo" />
+            </div>
+            <div class="p-5 flex-grow flex flex-col justify-between">
+              <div>
+                <h4 class="font-display font-bold text-lg">Марина Савченко</h4>
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#555555] mt-0.5">Co-Founder • Lead Frontend</p>
+                <p class="mt-3 text-sm text-[#444444]">Експертка з дизайн-систем, доступності (a11y) та продуктивності вебдодатків.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ментор 3 -->
+          <div class="squad-card bw-card overflow-hidden flex flex-col">
+            <div class="aspect-[4/4] overflow-hidden border-b border-[#111111]">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=700&q=80" alt="Дмитро Бондаренко" onerror="this.src='https://placehold.co/500x500/EAEAEA/111111?text=D.Bondarenko'" class="w-full h-full object-cover bw-photo" />
+            </div>
+            <div class="p-5 flex-grow flex flex-col justify-between">
+              <div>
+                <h4 class="font-display font-bold text-lg">Дмитро Бондаренко</h4>
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#555555] mt-0.5">DevOps & Cloud Mentor</p>
+                <p class="mt-3 text-sm text-[#444444]">Інженер Kubernetes та хмарних платформ. Організатор нічних хакатонів.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ментор 4 -->
+          <div class="squad-card bw-card overflow-hidden flex flex-col">
+            <div class="aspect-[4/4] overflow-hidden border-b border-[#111111]">
+              <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=700&q=80" alt="Ірина Мельник" onerror="this.src='https://placehold.co/500x500/EAEAEA/111111?text=I.Melnyk'" class="w-full h-full object-cover bw-photo" />
+            </div>
+            <div class="p-5 flex-grow flex flex-col justify-between">
+              <div>
+                <h4 class="font-display font-bold text-lg">Ірина Мельник</h4>
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#555555] mt-0.5">AI/ML & Community Lead</p>
+                <p class="mt-3 text-sm text-[#444444]">Дослідниця прикладного ML, координаторка освітніх програм для новачків.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 3. ПРОЄКТИ (PROJECTS)                                               -->
+  <!-- =================================================================== -->
+  <section id="page-projects" class="page-section py-12 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="max-w-2xl">
+            <span class="inline-block px-3.5 py-1 rounded-full border border-[#111111] text-xs font-semibold uppercase tracking-wider mb-4">
+              Open Source Лабораторія
+            </span>
+          <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
+            Проєкти спільноти
+          </h2>
+          <p class="mt-4 text-base text-[#444444]">
+            Інструменти, бібліотеки та сервіси, які ми розробляємо разом на хакатонах і у вільний час. Кожен репозиторій відкритий для контриб’юторів.
+          </p>
+        </div>
+        <button onclick="openRegisterModal('Запропонувати ідею проєкту')" class="btn-pill-solid px-7 py-3 text-sm font-semibold self-start md:self-auto">
+          Запропонувати проєкт
+        </button>
+      </div>
+
+      <!-- Сітка проєктів -->
+      <div class="mt-12 grid md:grid-cols-2 gap-6 sm:gap-8">
+        <!-- Проєкт 1: StackUI -->
+        <article class="squad-card p-7 sm:p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-4">
+              <span class="px-3 py-1 rounded-full bg-[#111111] text-white text-xs font-semibold">Активний • v2.4</span>
+              <span class="text-xs font-mono text-[#555555]">★ 840 stars</span>
+            </div>
+            <h3 class="mt-5 font-display font-extrabold text-2xl">StackUI Design System</h3>
+            <p class="mt-3 text-sm sm:text-base text-[#444444] leading-relaxed">
+              Мінімалістична монохромна бібліотека доступних UI-компонентів для React та Vue без зайвих залежностей і з повною підтримкою клавіатурної навігації.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">TypeScript</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">React 19</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Tailwind CSS</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">ARIA</span>
+            </div>
+          </div>
+          <div class="mt-8 pt-5 border-t border-[#111111]/15 flex flex-wrap gap-3">
+            <button onclick="showToast('Відкрито репозиторій StackUI на GitHub')" class="btn-pill-solid px-6 py-2.5 text-xs sm:text-sm font-semibold inline-flex items-center gap-2">
+              GitHub
+            </button>
+            <button onclick="showToast('Запущено інтерактивне демо StackUI')" class="btn-pill-outline px-6 py-2.5 text-xs sm:text-sm font-semibold">
+              Демо
+            </button>
+          </div>
+        </article>
+
+        <!-- Проєкт 2: OpenDev Map -->
+        <article class="squad-card p-7 sm:p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-4">
+              <span class="px-3 py-1 rounded-full bg-[#111111] text-white text-xs font-semibold">Активний • v1.8</span>
+              <span class="text-xs font-mono text-[#555555]">★ 512 stars</span>
+            </div>
+            <h3 class="mt-5 font-display font-extrabold text-2xl">OpenDev Map</h3>
+            <p class="mt-3 text-sm sm:text-base text-[#444444] leading-relaxed">
+              Інтерактивна мапа коворкінгів, укриттів зі стабільним Starlink-зв’язком та локацій для IT-зустрічей у містах України та Європи.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Next.js</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Go</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">PostgreSQL</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">MapLibre</span>
+            </div>
+          </div>
+          <div class="mt-8 pt-5 border-t border-[#111111]/15 flex flex-wrap gap-3">
+            <button onclick="showToast('Відкрито репозиторій OpenDev Map на GitHub')" class="btn-pill-solid px-6 py-2.5 text-xs sm:text-sm font-semibold">
+              GitHub
+            </button>
+            <button onclick="showToast('Запущено інтерактивне демо OpenDev Map')" class="btn-pill-outline px-6 py-2.5 text-xs sm:text-sm font-semibold">
+              Демо
+            </button>
+          </div>
+        </article>
+
+        <!-- Проєкт 3: SquadBot -->
+        <article class="squad-card p-7 sm:p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-4">
+              <span class="px-3 py-1 rounded-full border border-[#111111] text-[#111111] text-xs font-semibold">Beta • v0.9</span>
+              <span class="text-xs font-mono text-[#555555]">★ 329 stars</span>
+            </div>
+            <h3 class="mt-5 font-display font-extrabold text-2xl">SquadBot Assistant</h3>
+            <p class="mt-3 text-sm sm:text-base text-[#444444] leading-relaxed">
+              Open-source бот для Telegram та Discord, який автоматизує реєстрацію на мітапи, генерує QR-квитки, підбирає пару для random coffee та модерує чати.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Python 3.12</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Aiogram</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Redis</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Docker</span>
+            </div>
+          </div>
+          <div class="mt-8 pt-5 border-t border-[#111111]/15 flex flex-wrap gap-3">
+            <button onclick="showToast('Відкрито репозиторій SquadBot на GitHub')" class="btn-pill-solid px-6 py-2.5 text-xs sm:text-sm font-semibold">
+              GitHub
+            </button>
+            <button onclick="showToast('Відкрито пісочницю SquadBot')" class="btn-pill-outline px-6 py-2.5 text-xs sm:text-sm font-semibold">
+              Демо
+            </button>
+          </div>
+        </article>
+
+        <!-- Проєкт 4: CodeReview Hub -->
+        <article class="squad-card p-7 sm:p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-4">
+              <span class="px-3 py-1 rounded-full bg-[#111111] text-white text-xs font-semibold">Активний • v3.1</span>
+              <span class="text-xs font-mono text-[#555555]">★ 675 stars</span>
+            </div>
+            <h3 class="mt-5 font-display font-extrabold text-2xl">CodeReview Hub</h3>
+            <p class="mt-3 text-sm sm:text-base text-[#444444] leading-relaxed">
+              Платформа для анонімного та публічного розбору архітектурних рішень і пет-проєктів учасників спільноти з чек-листами якості коду.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">Rust</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">WebAssembly</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111]/40 text-xs font-medium">SvelteKit</span>
+            </div>
+          </div>
+          <div class="mt-8 pt-5 border-t border-[#111111]/15 flex flex-wrap gap-3">
+            <button onclick="showToast('Відкрито репозиторій CodeReview Hub на GitHub')" class="btn-pill-solid px-6 py-2.5 text-xs sm:text-sm font-semibold">
+              GitHub
+            </button>
+            <button onclick="showToast('Запущено інтерактивне демо CodeReview Hub')" class="btn-pill-outline px-6 py-2.5 text-xs sm:text-sm font-semibold">
+              Демо
+            </button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 4. ПОДІЇ (EVENTS)                                                   -->
+  <!-- =================================================================== -->
+  <section id="page-events" class="page-section py-12 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+            <span class="inline-block px-3.5 py-1 rounded-full border border-[#111111] text-xs font-semibold uppercase tracking-wider mb-4">
+              Розклад і новини
+            </span>
+          <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
+            Наші події
+          </h2>
+        </div>
+
+        <!-- Фільтри подій -->
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Фільтр подій">
+        <button onclick="filterEvents('all', this)" class="event-filter-btn btn-pill-solid px-5 py-2 text-xs sm:text-sm font-semibold">
+          Усі події
+        </button>
+        <button onclick="filterEvents('upcoming', this)" class="event-filter-btn btn-pill-outline px-5 py-2 text-xs sm:text-sm font-semibold">
+          Майбутні
+        </button>
+        <button onclick="filterEvents('past', this)" class="event-filter-btn btn-pill-outline px-5 py-2 text-xs sm:text-sm font-semibold">
+          Минулі
+        </button>
+      </div>
+
+      </div>
+
+      <!-- Список подій -->
+      <div id="events-list" class="mt-10 space-y-5" >
+        <!-- Подія 1 -->
+        <div data-status="past" class="event-item squad-card p-6 sm:p-8 bg-[#D3D3D3] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+            <div class="w-24 h-24 rounded-2xl bg-[#111111] text-white flex flex-col items-center justify-center shrink-0">
+              <span class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums">1</span>
+              <span class="text-xs uppercase tracking-widest mt-0.5">Листопада</span>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-[#555555]">
+                <span class="px-2.5 py-0.5 rounded-full border border-[#111111] text-[#111111]">Мітап</span>
+                <span>17:00 •Online Stream</span>
+              </div>
+              <h3 class="mt-2 font-display font-extrabold text-xl sm:text-2xl">
+                Stack Squad Meetup #25: Архітектура без зайвої складності
+              </h3>
+              <p class="mt-2 text-sm text-[#444444] max-w-2xl">
+                Три практичні доповіді про моноліти vs мікросервіси, оптимізацію SQL-запитів під високим навантаженням та панельна дискусія.
+              </p>
+              <div class="event-report-text hidden">
+                <p>Короткий підсумок зустрічі: розібрали 4 проєкти учасників і знайшли головні вузькі місця при першому рендері.</p>
+                <p>Головні висновки: зменшили розмір початкового бандлу, оптимізували шрифти й прибрали зайві рендери.</p>
+              </div>
+            </div>
+          </div>
+          <div class="shrink-0">
+            <button type="button" onclick="openA4FromCard(this)" class="w-full sm:w-auto btn-pill-outline px-8 py-3 text-sm font-semibold">
+              Підсумки
+            </button>
+          </div>
+        </div>
+
+        <!-- Подія 2 -->
+        <div data-status="upcoming" class="event-item squad-card p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+            <div class="w-24 h-24 rounded-2xl border-2 border-[#111111] text-[#111111] flex flex-col items-center justify-center shrink-0">
+              <span class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums">18</span>
+              <span class="text-xs uppercase tracking-widest mt-0.5">Грудня</span>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-[#555555]">
+                <span class="px-2.5 py-0.5 rounded-full border border-[#111111] text-[#111111]">Хакатон 48h</span>
+                <span>10:00 • Online (Discord Stage)</span>
+              </div>
+              <h3 class="mt-2 font-display font-extrabold text-xl sm:text-2xl">
+                OpenCivic Hack 2027: Інструменти для волонтерів та громад
+              </h3>
+              <p class="mt-2 text-sm text-[#444444] max-w-2xl">
+                48 годин командної розробки корисних сервісів із менторською підтримкою, призовим фондом та подальшим запуском у продакшен.
+              </p>
+            </div>
+          </div>
+          <div class="shrink-0">
+            <button onclick="openRegisterModal('OpenCivic Hack 2027')" class="w-full sm:w-auto btn-pill-solid px-8 py-3 text-sm font-semibold">
+              Записатися
+            </button>
+          </div>
+        </div>
+
+        <!-- Подія 3 -->
+        <div data-status="upcoming" class="event-item squad-card p-6 sm:p-8  flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+            <div class="w-24 h-24 rounded-2xl border-2 border-[#111111] text-[#111111] flex flex-col items-center justify-center shrink-0">
+              <span class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums">06</span>
+              <span class="text-xs uppercase tracking-widest mt-0.5">Січня</span>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-[#555555]">
+                <span class="px-2.5 py-0.5 rounded-full border border-[#111111] text-[#111111]">Воркшоп & Мітап</span>
+                <span>19:00 • Online (Discord Stage)</span>
+              </div>
+              <h3 class="mt-2 font-display font-extrabold text-xl sm:text-2xl">
+                Frontend Performance Lab: Від 40 до 100 балів у Lighthouse
+              </h3>
+              <p class="mt-2 text-sm text-[#444444] max-w-2xl">
+                Живий аудит вебдодатків учасників спільноти: розбираємо рендеринг, бандлінг, кешування та роботу з Core Web Vitals.
+              </p>
+            </div>
+          </div>
+          <div class="shrink-0">
+            <button onclick="openRegisterModal('Frontend Performance Lab')" class="w-full sm:w-auto btn-pill-solid px-8 py-3 text-sm font-semibold">
+              Записатися
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 5. ІСТОРІЯ (HISTORY)                                                -->
+  <!-- =================================================================== -->
+<!--  <section id="page-history" class="page-section py-12 sm:py-20">-->
+<!--    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">-->
+<!--      <div class="text-center max-w-2xl mx-auto">-->
+<!--          <span class="inline-block px-3.5 py-1 rounded-full border border-[#111111] text-xs font-semibold uppercase tracking-wider mb-4">-->
+<!--            Наш шлях-->
+<!--          </span>-->
+<!--        <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">-->
+<!--          Історія Stack Squad-->
+<!--        </h2>-->
+<!--        <p class="mt-4 text-base text-[#444444]">-->
+<!--          Від невеликої зустрічі на 12 розробників у київській кав’ярні до всеукраїнської open-source екосистеми.-->
+<!--        </p>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Вертикальний таймлайн &ndash;&gt;-->
+<!--      <div class="mt-14 relative border-l-2 border-[#111111] ml-4 sm:ml-8 space-y-10 pl-8 sm:pl-12">-->
+<!--        &lt;!&ndash; Етап 2021 &ndash;&gt;-->
+<!--        <div class="relative">-->
+<!--          <span class="absolute -left-[41px] sm:-left-[57px] top-1 w-5 h-5 rounded-full bg-[#111111] border-4 border-[#EAEAEA]"></span>-->
+<!--          <div class="squad-card p-6 sm:p-7">-->
+<!--            <span class="font-display font-extrabold text-sm tracking-widest uppercase px-3 py-1 rounded-full bg-[#111111] text-white">2021 • Початок</span>-->
+<!--            <h3 class="mt-4 font-display font-bold text-xl sm:text-2xl">Перша зустріч на 12 людей</h3>-->
+<!--            <p class="mt-2 text-sm sm:text-base text-[#444444] leading-relaxed">-->
+<!--              Кілька друзів-інженерів вирішили зібратися у п’ятницю ввечері, щоб обговорити міграцію на TypeScript та поділитися досвідом співбесід. Так народилася назва Stack Squad.-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Етап 2022 &ndash;&gt;-->
+<!--        <div class="relative">-->
+<!--          <span class="absolute -left-[41px] sm:-left-[57px] top-1 w-5 h-5 rounded-full bg-[#111111] border-4 border-[#EAEAEA]"></span>-->
+<!--          <div class="squad-card p-6 sm:p-7">-->
+<!--            <span class="font-display font-extrabold text-sm tracking-widest uppercase px-3 py-1 rounded-full border border-[#111111]">2022 • Волонтерський код</span>-->
+<!--            <h3 class="mt-4 font-display font-bold text-xl sm:text-2xl">Запуск перших благодійних хакатонів</h3>-->
+<!--            <p class="mt-2 text-sm sm:text-base text-[#444444] leading-relaxed">-->
+<!--              Спільнота виросла до 500 учасників. Ми об’єдналися для створення волонтерських платформ, систем координації логістики та відкритих карт допомоги.-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Етап 2024 &ndash;&gt;-->
+<!--        <div class="relative">-->
+<!--          <span class="absolute -left-[41px] sm:-left-[57px] top-1 w-5 h-5 rounded-full bg-[#111111] border-4 border-[#EAEAEA]"></span>-->
+<!--          <div class="squad-card p-6 sm:p-7">-->
+<!--            <span class="font-display font-extrabold text-sm tracking-widest uppercase px-3 py-1 rounded-full border border-[#111111]">2024 • Open-Source Лабораторія</span>-->
+<!--            <h3 class="mt-4 font-display font-bold text-xl sm:text-2xl">Реліз StackUI та менторська програма</h3>-->
+<!--            <p class="mt-2 text-sm sm:text-base text-[#444444] leading-relaxed">-->
+<!--              Опублікували нашу флагманську бібліотеку компонентів StackUI, яка набрала перші 500 зірок на GitHub, та запустили регулярні безкоштовні рев’ю резюме і пет-проєктів.-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Етап 2026 &ndash;&gt;-->
+<!--        <div class="relative">-->
+<!--          <span class="absolute -left-[41px] sm:-left-[57px] top-1 w-5 h-5 rounded-full bg-[#111111] border-4 border-[#EAEAEA]"></span>-->
+<!--          <div class="squad-card p-6 sm:p-7">-->
+<!--            <span class="font-display font-extrabold text-sm tracking-widest uppercase px-3 py-1 rounded-full bg-[#111111] text-white">2026 • Сьогодні</span>-->
+<!--            <h3 class="mt-4 font-display font-bold text-xl sm:text-2xl">2 400+ учасників та міжнародні хаби</h3>-->
+<!--            <p class="mt-2 text-sm sm:text-base text-[#444444] leading-relaxed">-->
+<!--              Проводимо регулярні гібридні зустрічі в Києві, Львові, Празі та Варшаві. Готуємо ювілейний 25-й мітап спільноти!-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </section>-->
+
+  <!-- =================================================================== -->
+  <!-- 6. ГАЛЕРЕЯ (GALLERY)                                                -->
+  <!-- =================================================================== -->
+  <section id="page-gallery" class="page-section py-12 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+            <span class="inline-block px-3.5 py-1 rounded-full border border-[#111111] text-xs font-semibold uppercase tracking-wider mb-4">
+              Монохромний архів
+            </span>
+          <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
+            Галерея зустрічей
+          </h2>
+        </div>
+
+        <!-- Фільтри галереї -->
+        <div class="flex flex-wrap gap-2">
+          <button onclick="filterGallery('all', this)" class="gallery-filter-btn btn-pill-solid px-5 py-2 text-xs sm:text-sm font-semibold">Усі фото</button>
+          <button onclick="filterGallery('meetups', this)" class="gallery-filter-btn btn-pill-outline px-5 py-2 text-xs sm:text-sm font-semibold">Мітапи</button>
+          <button onclick="filterGallery('hackathons', this)" class="gallery-filter-btn btn-pill-outline px-5 py-2 text-xs sm:text-sm font-semibold">Хакатони</button>
+          <button onclick="filterGallery('workshops', this)" class="gallery-filter-btn btn-pill-outline px-5 py-2 text-xs sm:text-sm font-semibold">Воркшопи</button>
+        </div>
+      </div>
+
+      <!-- Адаптивна сітка фотографій -->
+      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Фото 1 -->
+        <div data-gallery="meetups" onclick="openLightbox('https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1200&q=85', 'Stack Squad Meetup #24 — Панельна дискусія про системний дизайн')" class="gallery-item squad-card bw-card overflow-hidden cursor-pointer group">
+          <div class="aspect-[4/3] overflow-hidden border-b border-[#111111]">
+            <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80" alt="Stack Squad Meetup #24" onerror="this.src='https://placehold.co/600x450/EAEAEA/111111?text=Meetup+%2324'" class="w-full h-full object-cover bw-photo" />
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-bold text-sm">Stack Squad Meetup #24</h3>
+              <p class="text-xs text-[#555555]">Київ • Панельна дискусія</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border border-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">Відкрити</span>
+          </div>
+        </div>
+
+        <!-- Фото 2 -->
+        <div data-gallery="hackathons" onclick="openLightbox('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85', 'Нічна сесія кодингу на OpenCivic Hackathon')" class="gallery-item squad-card bw-card overflow-hidden cursor-pointer group">
+          <div class="aspect-[4/3] overflow-hidden border-b border-[#111111]">
+            <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80" alt="Нічна сесія кодингу" onerror="this.src='https://placehold.co/600x450/EAEAEA/111111?text=Hackathon'" class="w-full h-full object-cover bw-photo" />
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-bold text-sm">OpenCivic Hackathon</h3>
+              <p class="text-xs text-[#555555]">Львів • 03:00 ночі, фінальний деплой</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border border-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">Відкрити</span>
+          </div>
+        </div>
+
+        <!-- Фото 3 -->
+        <div data-gallery="workshops" onclick="openLightbox('https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=85', 'Воркшоп із парного програмування та архітектури')" class="gallery-item squad-card bw-card overflow-hidden cursor-pointer group">
+          <div class="aspect-[4/3] overflow-hidden border-b border-[#111111]">
+            <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80" alt="Воркшоп із парного програмування" onerror="this.src='https://placehold.co/600x450/EAEAEA/111111?text=Workshop'" class="w-full h-full object-cover bw-photo" />
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-bold text-sm">Architecture Workshop</h3>
+              <p class="text-xs text-[#555555]">Практичний розбір мікросервісів</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border border-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">Відкрити</span>
+          </div>
+        </div>
+
+        <!-- Фото 4 -->
+        <div data-gallery="meetups" onclick="openLightbox('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=85', 'Нетворкінг після виступів спікерів')" class="gallery-item squad-card bw-card overflow-hidden cursor-pointer group">
+          <div class="aspect-[4/3] overflow-hidden border-b border-[#111111]">
+            <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80" alt="Нетворкінг спільноти" onerror="this.src='https://placehold.co/600x450/EAEAEA/111111?text=Networking'" class="w-full h-full object-cover bw-photo" />
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-bold text-sm">Afterparty & Coffee</h3>
+              <p class="text-xs text-[#555555]">Неформальне спілкування після мітапу</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border border-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">Відкрити</span>
+          </div>
+        </div>
+
+        <!-- Фото 5 -->
+        <div data-gallery="hackathons" onclick="openLightbox('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85', 'Пітчинг проєктів перед журі та менторами')" class="gallery-item squad-card bw-card overflow-hidden cursor-pointer group">
+          <div class="aspect-[4/3] overflow-hidden border-b border-[#111111]">
+            <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80" alt="Пітчинг проєктів" onerror="this.src='https://placehold.co/600x450/EAEAEA/111111?text=Demo+Day'" class="w-full h-full object-cover bw-photo" />
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-bold text-sm">Demo Day Фінал</h3>
+              <p class="text-xs text-[#555555]">Презентація MVP за 5 хвилин</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border border-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">Відкрити</span>
+          </div>
+        </div>
+
+        <!-- Фото 6 -->
+        <div data-gallery="workshops" onclick="openLightbox('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=85', 'Стратегічна сесія контриб’юторів StackUI')" class="gallery-item squad-card bw-card overflow-hidden cursor-pointer group">
+          <div class="aspect-[4/3] overflow-hidden border-b border-[#111111]">
+            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80" alt="Командна сесія StackUI" onerror="this.src='https://placehold.co/600x450/EAEAEA/111111?text=StackUI+Team'" class="w-full h-full object-cover bw-photo" />
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-bold text-sm">StackUI Contributors</h3>
+              <p class="text-xs text-[#555555]">Планування релізу v3.0</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border border-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">Відкрити</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 7. PATREON (ПІДТРИМКА СПІЛЬНОТИ)                                    -->
+  <!-- =================================================================== -->
+  <section id="page-patreon" class="page-section py-12 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto">
+          <span class="inline-block px-3.5 py-1 rounded-full border border-[#111111] text-xs font-semibold uppercase tracking-wider mb-4">
+            Patreon & Спонсорство
+          </span>
+        <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
+          Підтримайте незалежну IT-спільноту
+        </h2>
+        <p class="mt-4 text-base text-[#444444]">
+          100% внесків спрямовуються на оренду залів для безкоштовних мітапів, каву для учасників, запис якісних відеодоповідей та підтримку open-source інфраструктури.
+        </p>
+      </div>
+
+      <!-- 3 рівні підписки -->
+      <div class="mt-14 grid lg:grid-cols-3 gap-7 items-stretch">
+        <!-- Рівень 1: Junior Supporter -->
+        <div class="squad-card p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-widest text-[#555555]">Рівень 01</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111] text-xs font-semibold">Базовий</span>
+            </div>
+            <h3 class="mt-4 font-display font-extrabold text-2xl">Junior Supporter</h3>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="font-display font-extrabold text-4xl sm:text-5xl tabular-nums">$5</span>
+              <span class="text-sm text-[#555555]">/ місяць</span>
+            </div>
+            <p class="mt-3 text-sm text-[#444444]">
+              Чудовий спосіб подякувати команді за контент і допомогти з організацією щомісячних зустрічей.
+            </p>
+
+            <ul class="mt-6 space-y-3 text-sm border-t border-[#111111]/15 pt-6">
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Бейдж патрона у Discord та Telegram-чаті</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Ранній доступ до записів усіх доповідей</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Згадка у титрах нашого YouTube-каналу</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8">
+            <button onclick="openRegisterModal('Patreon: Junior Supporter ($5/міс)')" class="w-full btn-pill-outline py-3.5 text-sm font-semibold">
+              Обрати Junior Supporter
+            </button>
+          </div>
+        </div>
+
+        <!-- Рівень 2: Middle Contributor (Виділена контрастна картка) -->
+        <div class="rounded-[20px] bg-[#111111] text-white p-8 flex flex-col justify-between shadow-2xl transform lg:-translate-y-2 border border-[#111111]">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-widest text-white/70">Рівень 02</span>
+              <span class="px-3 py-1 rounded-full bg-white text-[#111111] text-xs font-bold">Найпопулярніший</span>
+            </div>
+            <h3 class="mt-4 font-display font-extrabold text-2xl">Middle Contributor</h3>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="font-display font-extrabold text-4xl sm:text-5xl tabular-nums">$15</span>
+              <span class="text-sm text-white/70">/ місяць</span>
+            </div>
+            <p class="mt-3 text-sm text-white/80">
+              Для розробників, які хочуть брати активну участь у розвитку проєктів та отримувати фідбек від менторів.
+            </p>
+
+            <ul class="mt-6 space-y-3 text-sm border-t border-white/20 pt-6">
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Усі бонуси рівня Junior Supporter</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Гарантована бронь місця на офлайн-мітапах</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Щомісячне рев’ю CV або пет-проєкту від сеньйорів</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Фірмовий монохромний стікерпак Stack Squad</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8">
+            <button onclick="openRegisterModal('Patreon: Middle Contributor ($15/міс)')" class="w-full rounded-full bg-white text-[#111111] hover:bg-[#EAEAEA] transition-colors py-3.5 text-sm font-bold">
+              Стати Middle Contributor
+            </button>
+          </div>
+        </div>
+
+        <!-- Рівень 3: Senior Patron -->
+        <div class="squad-card p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-widest text-[#555555]">Рівень 03</span>
+              <span class="px-3 py-1 rounded-full border border-[#111111] text-xs font-semibold">Меценат</span>
+            </div>
+            <h3 class="mt-4 font-display font-extrabold text-2xl">Senior Patron</h3>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="font-display font-extrabold text-4xl sm:text-5xl tabular-nums">$50</span>
+              <span class="text-sm text-[#555555]">/ місяць</span>
+            </div>
+            <p class="mt-3 text-sm text-[#444444]">
+              Максимальна підтримка місії Stack Squad для техлідів, архітекторів та невеликих продуктових команд.
+            </p>
+
+            <ul class="mt-6 space-y-3 text-sm border-t border-[#111111]/15 pt-6">
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Усі бонуси рівня Middle Contributor</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Індивідуальна 1-на-1 менторська сесія щомісяця</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Право голосу у виборі тем наступних хакатонів</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="font-bold">✓</span>
+                <span>Лімітований чорний худі Stack Squad (після 3 міс.)</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8">
+            <button onclick="openRegisterModal('Patreon: Senior Patron ($50/міс)')" class="w-full btn-pill-solid py-3.5 text-sm font-semibold">
+              Обрати Senior Patron
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 8. КОНТАКТИ (CONTACTS)                                              -->
+  <!-- =================================================================== -->
+  <section id="page-contacts" class="page-section py-12 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-12 gap-10 items-start">
+        <!-- Ліва колонка: Інформація та соцмережі -->
+        <div class="lg:col-span-5 space-y-8">
+          <div>
+              <span class="inline-block px-3.5 py-1 rounded-full border border-[#111111] text-xs font-semibold uppercase tracking-wider mb-4">
+                Зв’язок
+              </span>
+            <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight">
+              Напишіть нам
+            </h2>
+            <p class="mt-4 text-base text-[#444444] leading-relaxed">
+              Хочете виступити з доповіддю, запропонувати партнерство на хакатон або маєте запитання щодо участі у спільноті? Ми завжди на зв’язку.
+            </p>
+          </div>
+
+          <!-- Локація проведення зустрічей -->
+          <div class="squad-card p-6">
+            <div class="text-xs font-bold uppercase tracking-widest text-[#555555]">Основний хаб зустрічей</div>
+            <div class="mt-2 font-display font-bold text-lg">Проводимо зустрічі щотижня</div>
+            <p class="mt-1 text-sm text-[#444444]">Приєднуйся та проводь час весело та цікаво  </p>
+            <div class="mt-3 text-sm font-medium">hello@stacksquad.dev</div>
+          </div>
+
+          <!-- Соціальні мережі (Pill-кнопки) -->
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-[#555555] mb-3.5">Наші канали</div>
+            <div class="flex flex-wrap gap-3">
+              <button onclick="showToast('Перехід у Telegram-спільноту @stacksquad_ua')" class="btn-pill-solid px-5 py-2.5 text-sm font-semibold">
+                Telegram
+              </button>
+              <button onclick="showToast('Перехід на Discord-сервер Stack Squad')" class="btn-pill-outline px-5 py-2.5 text-sm font-semibold">
+                Discord
+              </button>
+              <button onclick="showToast('Перехід на GitHub організацію StackSquad')" class="btn-pill-outline px-5 py-2.5 text-sm font-semibold">
+                GitHub
+              </button>
+              <button onclick="showToast('Перехід на YouTube канал Stack Squad Talks')" class="btn-pill-outline px-5 py-2.5 text-sm font-semibold">
+                YouTube
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Права колонка: Мінімалістична форма зворотного зв'язку -->
+        <div class="lg:col-span-7">
+          <form onsubmit="handleContactSubmit(event)" class="squad-card p-7 sm:p-10 space-y-5">
+            <h3 class="font-display font-bold text-2xl">Форма зворотного зв’язку</h3>
+
+            <div class="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label for="contact-name" class="block text-xs font-bold uppercase tracking-wider mb-2">Ваше ім’я *</label>
+                <input id="contact-name" type="text" required placeholder="Тарас Шевченко" class="w-full px-4 py-3 rounded-xl bg-white border border-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#111111]" />
+              </div>
+              <div>
+                <label for="contact-email" class="block text-xs font-bold uppercase tracking-wider mb-2">Email або Telegram *</label>
+                <input id="contact-email" type="text" required placeholder="@username або email" class="w-full px-4 py-3 rounded-xl bg-white border border-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#111111]" />
+              </div>
+            </div>
+
+            <div>
+              <label for="contact-topic" class="block text-xs font-bold uppercase tracking-wider mb-2">Тема звернення</label>
+              <select id="contact-topic" class="w-full px-4 py-3 rounded-xl bg-white border border-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#111111]">
+                <option>Хочу стати спікером на мітапі</option>
+                <option>Співпраця та спонсорство</option>
+                <option>Долучитися до Open-Source проєкту</option>
+                <option>Інше запитання</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="contact-message" class="block text-xs font-bold uppercase tracking-wider mb-2">Повідомлення *</label>
+              <textarea id="contact-message" rows="4" required placeholder="Розкажіть коротко про вашу ідею або запит..." class="w-full px-4 py-3 rounded-xl bg-white border border-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#111111]"></textarea>
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" class="w-full sm:w-auto btn-pill-solid px-9 py-3.5 text-sm font-semibold">
+                Надіслати повідомлення
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ==================== МІНІМАЛІСТИЧНИЙ ФУТЕР ==================== -->
+<footer class="border-t border-[#111111]/15 bg-[#EAEAEA] py-8 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-[#555555]">
+    <div class="flex items-center gap-2 font-display font-bold text-[#111111]">
+      <span>Stack Squad</span>
+      <span>© 2026</span>
+    </div>
+    <div class="flex flex-wrap justify-center gap-5">
+      <button onclick="navigateTo('about')" class="hover:text-[#111111] transition-colors">Про нас</button>
+      <button onclick="navigateTo('projects')" class="hover:text-[#111111] transition-colors">Проєкти</button>
+      <button onclick="navigateTo('events')" class="hover:text-[#111111] transition-colors">Події</button>
+      <button onclick="navigateTo('patreon')" class="hover:text-[#111111] transition-colors">Patreon</button>
+      <button onclick="navigateTo('contacts')" class="hover:text-[#111111] transition-colors">Контакти</button>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== МОДАЛЬНЕ ВІКНО РЕЄСТРАЦІЇ ==================== -->
+<div id="registerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#111111]/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="bg-[#EFEFEF] border border-[#111111] rounded-3xl max-w-md w-full p-7 sm:p-8 shadow-2xl relative animate-[fadeSlideIn_0.25s_ease_forwards]">
+    <button onclick="closeRegisterModal()" aria-label="Закрити вікно" class="absolute top-5 right-5 w-9 h-9 rounded-full border border-[#111111] flex items-center justify-center text-[#111111] hover:bg-[#111111] hover:text-white transition-colors">
+      ✕
+    </button>
+
+    <span class="inline-block px-3 py-1 rounded-full bg-[#111111] text-white text-[11px] font-bold uppercase tracking-wider">
+        Реєстрація учасника
+      </span>
+    <h3 id="modalTitle" class="mt-3 font-display font-extrabold text-2xl text-[#111111]">
+      Stack Squad Meetup #25
+    </h3>
+    <p class="mt-1.5 text-sm text-[#444444]">
+      Заповніть коротку форму — ми надішлемо підтвердження та запрошення у календар.
+    </p>
+
+    <form onsubmit="handleRegisterSubmit(event)" class="mt-6 space-y-4">
+      <div>
+        <label for="reg-name" class="block text-xs font-bold uppercase tracking-wider mb-1.5">Ім’я та прізвище *</label>
+        <input id="reg-name" type="text" required placeholder="Олена Коваль" class="w-full px-4 py-2.5 rounded-xl bg-white border border-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#111111]" />
+      </div>
+      <div>
+        <label for="reg-contact" class="block text-xs font-bold uppercase tracking-wider mb-1.5">Email або Telegram *</label>
+        <input id="reg-contact" type="text" required placeholder="olena@dev.ua або @olena_dev" class="w-full px-4 py-2.5 rounded-xl bg-white border border-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#111111]" />
+      </div>
+
+
+      <div class="pt-2 flex gap-3">
+        <button type="submit" class="flex-1 btn-pill-solid py-3 text-sm font-semibold">
+          Підтвердити запис
+        </button>
+        <button type="button" onclick="closeRegisterModal()" class="btn-pill-outline px-5 py-3 text-sm font-semibold">
+          Скасувати
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== ЛАЙТБОКС ДЛЯ ГАЛЕРЕЇ ==================== -->
+<div id="lightboxModal" onclick="closeLightbox()" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#111111]/85 backdrop-blur-sm p-4">
+  <div onclick="event.stopPropagation()" class="max-w-4xl w-full bg-[#EFEFEF] border border-[#111111] rounded-3xl overflow-hidden shadow-2xl">
+    <div class="relative">
+      <img id="lightboxImg" src="" alt="Перегляд фото" class="w-full max-h-[75vh] object-cover bw-photo" />
+      <button onclick="closeLightbox()" aria-label="Закрити фото" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-[#111111] text-white flex items-center justify-center hover:scale-105 transition-transform">
+        ✕
+      </button>
+    </div>
+    <div class="p-4 sm:p-5 flex items-center justify-between gap-4">
+      <p id="lightboxCaption" class="font-display font-bold text-sm sm:text-base text-[#111111]"></p>
+      <button onclick="closeLightbox()" class="btn-pill-outline px-5 py-1.5 text-xs font-semibold shrink-0">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== СПОЛОХУЮЧЕ ПОВІДОМЛЕННЯ (TOAST) ==================== -->
+<div id="toastBox" class="fixed bottom-5 right-5 z-50 hidden items-center gap-3 bg-[#111111] text-white px-5 py-3.5 rounded-full shadow-xl text-xs sm:text-sm font-medium border border-white/15">
+  <span class="w-2 h-2 rounded-full bg-white"></span>
+  <span id="toastText">Повідомлення</span>
+</div>
+
+<!-- ======================== МОДАЛЬНЕ ВІКНО =================================== -->
+<div id="a4Modal" onclick="if (event.target === this) closeA4()" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+  <div class="bg-white text-[#111111] w-full max-w-[650px] max-h-[90vh] md:aspect-[210/297] overflow-y-auto p-6 sm:p-10 shadow-2xl border border-[#111111] flex flex-col justify-between">
+    <div>
+      <div class="flex items-center justify-between border-b border-[#D4D4D4] pb-4 mb-6">
+        <span class="text-xs uppercase tracking-widest text-[#555555]">Stack Squad • Підсумки події</span>
+        <button type="button" onclick="closeA4()" class="w-8 h-8 rounded-full border border-[#111111] font-semibold">✕</button>
+      </div>
+      <div id="a4Text" class="text-sm sm:text-base leading-relaxed space-y-3"></div>
+    </div>
+    <div class="pt-6 mt-6 border-t border-[#E5E5E5] text-right">
+      <button type="button" onclick="closeA4()" class="btn-pill-solid px-6 py-2 text-xs font-semibold">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== JAVASCRIPT ЛОГІКА SPA ==================== -->
+<script>
+  // 1. Навігація між вкладками без перезавантаження (SPA)
+  function navigateTo(pageId) {
+    // Приховуємо всі секції
+    document.querySelectorAll('.page-section').forEach(section => {
+      section.classList.remove('active');
+    });
+
+    // Показуємо обрану секцію
+    const target = document.getElementById('page-' + pageId);
+    if (target) {
+      target.classList.add('active');
+    }
+
+    // Оновлюємо активний стан кнопок у десктопному та мобільному меню
+    document.querySelectorAll('[data-nav]').forEach(btn => {
+      if (btn.getAttribute('data-nav') === pageId) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Закриваємо мобільне меню після кліку
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (!mobileMenu.classList.contains('hidden')) {
+      toggleMobileMenu();
+    }
+
+    // Плавний скрол вгору
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 2. Перемикання мобільного меню
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const iconOpen = document.getElementById('menuIconOpen');
+    const iconClose = document.getElementById('menuIconClose');
+
+    menu.classList.toggle('hidden');
+    iconOpen.classList.toggle('hidden');
+    iconClose.classList.toggle('hidden');
+  }
+
+  // 3. Живий інтерактивний таймер зворотного відліку (стартує з 38д 12г 31хв 24с як на макеті)
+  (function initCountdown() {
+    let totalSeconds = (38 * 86400) + (12 * 3600) + (31 * 60) + 24;
+
+    const elDays = document.getElementById('timer-days');
+    const elHours = document.getElementById('timer-hours');
+    const elMinutes = document.getElementById('timer-minutes');
+    const elSeconds = document.getElementById('timer-seconds');
+
+    function updateDisplay() {
+      if (totalSeconds < 0) totalSeconds = 38 * 86400;
+
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      elDays.textContent = String(days).padStart(2, '0');
+      elHours.textContent = String(hours).padStart(2, '0');
+      elMinutes.textContent = String(minutes).padStart(2, '0');
+      elSeconds.textContent = String(seconds).padStart(2, '0');
+
+      totalSeconds--;
+    }
+
+    updateDisplay();
+    setInterval(updateDisplay, 1000);
+  })();
+  function filterEvents(status, btn) {
+    // Оновлюємо активний стан кнопок
+    document.querySelectorAll('.event-filter-btn').forEach(b => {
+      b.classList.remove('btn-pill-solid');
+      b.classList.add('btn-pill-outline');
+    });
+    btn.classList.remove('btn-pill-outline');
+    btn.classList.add('btn-pill-solid');
+
+    // Показуємо або ховаємо картки за data-status (використовуємо .event-item)
+    document.querySelectorAll('.event-item').forEach(card => {
+      const cardStatus = card.getAttribute('data-status');
+
+      if (status === 'all' || cardStatus === status) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  }
+  function openA4FromCard(btn) {
+    const card = btn.closest('.event-item');
+    const reportEl = card ? card.querySelector('.event-report-text') : null;
+
+    document.getElementById('a4Text').innerHTML = reportEl ? reportEl.innerHTML : '';
+
+    const modal = document.getElementById('a4Modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeA4() {
+    const modal = document.getElementById('a4Modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  // 5. Фільтрація галереї (Gallery)
+  function filterGallery(category, clickedBtn) {
+    document.querySelectorAll('.gallery-filter-btn').forEach(btn => {
+      btn.classList.remove('btn-pill-solid');
+      btn.classList.add('btn-pill-outline');
+    });
+    clickedBtn.classList.remove('btn-pill-outline');
+    clickedBtn.classList.add('btn-pill-solid');
+
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      if (category === 'all' || item.getAttribute('data-gallery') === category) {
+        item.style.display = '';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+
+  // 6. Модальне вікно реєстрації
+  function openRegisterModal(eventName) {
+    const modal = document.getElementById('registerModal');
+    const title = document.getElementById('modalTitle');
+    title.textContent = eventName || 'Stack Squad Meetup #25';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeRegisterModal() {
+    const modal = document.getElementById('registerModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function handleRegisterSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value;
+    const eventTitle = document.getElementById('modalTitle').textContent;
+    e.target.reset();
+    closeRegisterModal();
+    showToast(`Дякуємо, ${name}! Ви записані на «${eventTitle}».`);
+  }
+
+  // 7. Лайтбокс для перегляду фото у галереї
+  function openLightbox(src, caption) {
+    const modal = document.getElementById('lightboxModal');
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightboxCaption').textContent = caption;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeLightbox() {
+    const modal = document.getElementById('lightboxModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  // 8. Обробка форми контактів
+  function handleContactSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('contact-name').value;
+    e.target.reset();
+    showToast(`Повідомлення відправлено! Очікуйте відповідь, ${name}.`);
+  }
+
+  // 9. Спливаючі сповіщення (замість alert)
+  let toastTimeout;
+  function showToast(message) {
+    const box = document.getElementById('toastBox');
+    const text = document.getElementById('toastText');
+    text.textContent = message;
+
+    box.classList.remove('hidden');
+    box.classList.add('flex');
+
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      box.classList.add('hidden');
+      box.classList.remove('flex');
+    }, 3600);
+  }
+
+  // Закриття модальних вікон клавішею Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeRegisterModal();
+      closeLightbox();
+    }
+  });
+</script>
+</body>
+</html>
